@@ -7,7 +7,36 @@ import (
     "os"
     "log"
     "github.com/joho/godotenv"
+    "github.com/google/uuid"
 )
+
+type EmailInfo struct{
+    Sender string
+    Recipient string
+    Message string
+    Subject string
+    InvoiceId uuid.UUID
+    UserId uuid.UUID
+    MessageType MessageType
+    InvoiceType InvoiceType
+}
+type MessageType int
+
+const (
+    Email MessageType = iota
+    SMS
+)
+
+type InvoiceType int
+
+const (
+    draft InvoiceType = iota
+    sent
+    paid
+    canceled
+)
+
+
 func SendEmail() {
     godotenv.Load()
 

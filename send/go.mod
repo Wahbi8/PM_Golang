@@ -1,4 +1,4 @@
-module github.com/Wahbi8/rabbitmq_project
+module github.com/Wahbi8/Rabbitmq_test/send
 
 go 1.23.4
 

@@ -11,7 +11,7 @@ import (
 )
 
 type EmailInfo struct{
-    Sender string
+    Sender string 
     Recipient string
     Message string
     Subject string

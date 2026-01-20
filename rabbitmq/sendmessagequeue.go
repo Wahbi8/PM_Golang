@@ -2,6 +2,7 @@ package rabbitmq
 
 import (
 	// "context"
+	"fmt"
 	"log"
 	// "math/bits"
 	// "os"
@@ -9,8 +10,8 @@ import (
 	// "time"
 	"encoding/json"
 
+	"github.com/Wahbi8/PM_Golang/Services"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"github.com/Wahbi8/PM_Golang/services"
 )
 
 func failOnError(err error, msg string) {
@@ -19,7 +20,7 @@ func failOnError(err error, msg string) {
 	}
 }
 
-func SendQueueMsg() {
+func SendQueueMsg(emailInfo Services.EmailInfo) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672")
 	failOnError(err, "Failed to create connection")
 	defer conn.Close()
@@ -28,7 +29,30 @@ func SendQueueMsg() {
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
-	q, err := ch.QueueDeclare()
+	q, err := ch.QueueDeclare(
+		"email_queue",
+		true,	//durable
+		false,	//delete when unused
+		false,	//exclusive
+		false,	//no-wait
+		nil,		//arguments
+	)
+	failOnError(err, "problem with the queue")
+
+	err = ch.Publish(
+		"",		//exchange
+		q.Name,	//routing key (queue name)
+		false, 	//mandatory
+		false,	//emmediate
+		amqp.Publishing{
+			DeliveryMode: amqp.Persistent,
+			ContentType: "application/json",
+			Body: QueueMsg(emailInfo),
+		},
+	)
+	failOnError(err, "Failed to publish message")
+
+	fmt.Printf("Email queued for %s\n", emailInfo.Recipient)
 }
 
 func QueueMsg(emailInfo Services.EmailInfo) []byte {

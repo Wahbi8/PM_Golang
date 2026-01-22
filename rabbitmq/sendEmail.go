@@ -1,10 +1,11 @@
 package rabbitmq
 
-import(
+import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/Wahbi8/PM_Golang/Services"
-	amqp "github.com/rebbitmq/amqp091-go"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func SendEmail(emailInfo Services.EmailInfo) {
@@ -37,6 +38,28 @@ func SendEmail(emailInfo Services.EmailInfo) {
 	)
 	failOnError(err, "Failed to register consumer on SendEmail")
 
-	
+	forever := make(chan bool)
 
+	go func() {
+		for d := range msgs {
+			var emailMsg map[string]string
+			err := json.Unmarshal(d.Body, &emailMsg)
+			if err != nil {
+				fmt.Printf("Error parsing message: %v\n", err)
+				d.Nack(false, false) // reject message
+				continue
+			}
+
+			err = Services.SendEmail(emailMsg["to"], emailMsg["subject"], emailMsg["body"])
+			if err != nil {
+				fmt.Printf("Failed to send email: %v\n", err)
+				d.Nack(false, true) // requeue message
+			} else {
+				fmt.Printf("Email sent to: %s\n", emailMsg["to"])
+				d.Ack(false) // acknowledge message
+			}
+		}
+	}()
+	fmt.Println("Waiting for messages...")
+	<-forever
 }

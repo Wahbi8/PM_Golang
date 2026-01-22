@@ -37,7 +37,7 @@ const (
 )
 
 
-func SendEmail() {
+func SendEmail(to, subject, body string) error {
     godotenv.Load()
 
     apiKey := os.Getenv("Resend_api_key")
@@ -60,7 +60,9 @@ func SendEmail() {
     sent, err := client.Emails.Send(params)
     if err != nil {
         fmt.Println(err.Error())
-        return
+        return err
     }
     fmt.Println(sent.Id)
+
+    return nil
 }

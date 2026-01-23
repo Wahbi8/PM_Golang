@@ -17,6 +17,9 @@ func SendEmail(emailInfo Services.EmailInfo) {
 	failOnError(err, "Failed to create connection in send email")
 	defer ch.Close()
 
+	err = ch.Qos(5, 0, false)
+	failOnError(err, "Failed to set QoS")
+	
 	q, err := ch.QueueDeclare(
 		"email_queue",
 		true,

@@ -8,7 +8,14 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func SendEmail(emailInfo Services.EmailInfo) {
+type QueueMsgStruct struct{
+	Recipient string 	`json:"to"`
+	Subject string 		`json:"subject"`
+	Body string 		`json:"body"`
+	Retry int			`json:"retry"`
+}
+
+func SendQueueEmail(emailInfo Services.EmailInfo) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672")
 	failOnError(err, "Failed to create connection in sendEmail")
 	defer conn.Close()
@@ -45,24 +52,47 @@ func SendEmail(emailInfo Services.EmailInfo) {
 
 	go func() {
 		for d := range msgs {
-			var emailMsg map[string]string
-			err := json.Unmarshal(d.Body, &emailMsg)
+			var msg QueueMsgStruct
+			err := json.Unmarshal(d.Body, &msg)
 			if err != nil {
-				fmt.Printf("Error parsing message: %v\n", err)
-				d.Nack(false, false) // reject message
+				fmt.Printf("Malformed message: %v\n", err)
+				d.Ack(false) // Remove bad message from queue
 				continue
 			}
 
-			err = Services.SendEmail(emailMsg["to"], emailMsg["subject"], emailMsg["body"])
+			err = Services.SendEmail(msg.Recipient, msg.Subject, msg.Body)
+			
 			if err != nil {
-				fmt.Printf("Failed to send email: %v\n", err)
-				d.Nack(false, true) // requeue message
+				if msg.Retry >= 3 {
+					fmt.Printf("FAILED: Max retries reached for %s. Saving to DB...\n", msg.Recipient)
+					// TODO: Add to database here
+
+
+
+					d.Ack(false)
+				} else {
+					msg.Retry++
+					fmt.Printf("RETRYING (%d/3): Sending back to queue\n", msg.Retry)
+					
+					// 1. Convert updated struct back to bytes
+					newBody, _ := json.Marshal(msg)
+					
+					// 2. Publish the UPDATED message back to the queue
+					err = ch.Publish("", q.Name, false, false, amqp.Publishing{
+						ContentType:  "application/json",
+						DeliveryMode: amqp.Persistent,
+						Body:         newBody,
+					})
+					
+					d.Ack(false)
+				}
 			} else {
-				fmt.Printf("Email sent to: %s\n", emailMsg["to"])
-				d.Ack(false) // acknowledge message
+				fmt.Printf("SUCCESS: Email sent to %s\n", msg.Recipient)
+				d.Ack(false)
 			}
 		}
 	}()
-	fmt.Println("Waiting for messages...")
+
+	fmt.Println("Worker started. Waiting for messages...")
 	<-forever
 }

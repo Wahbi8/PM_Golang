@@ -10,8 +10,9 @@ import (
 	// "time"
 	"encoding/json"
 
-	"github.com/Wahbi8/PM_Golang/Services"
 	amqp "github.com/rabbitmq/amqp091-go"
+    "github.com/Wahbi8/PM_Golang/DTO"
+
 )
 
 func failOnError(err error, msg string) {
@@ -20,7 +21,7 @@ func failOnError(err error, msg string) {
 	}
 }
 
-func SendQueueMsg(emailInfo Services.EmailInfo) {
+func SendQueueMsg(emailInfo dto.EmailInfo) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672")
 	failOnError(err, "Failed to create connection")
 	defer conn.Close()
@@ -55,12 +56,14 @@ func SendQueueMsg(emailInfo Services.EmailInfo) {
 	fmt.Printf("Email queued for %s\n", emailInfo.Recipient)
 }
 
-func QueueMsg(emailInfo Services.EmailInfo) []byte {
+func QueueMsg(emailInfo dto.EmailInfo) []byte {
 	message := map[string]interface{}{
 			"to":      emailInfo.Recipient, 
 			"subject": "Invoice",
 			"body":    emailInfo.Message,
 			"retry":   0,
+			"invoice_id": emailInfo.InvoiceId,
+			"invoice_type": emailInfo.InvoiceType,
 		}
 
 	bytes, err := json.Marshal(message)

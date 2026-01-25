@@ -6,6 +6,8 @@ import (
 
 	"github.com/Wahbi8/PM_Golang/Services"
 	amqp "github.com/rabbitmq/amqp091-go"
+    "github.com/Wahbi8/PM_Golang/DTO"
+
 )
 
 type QueueMsgStruct struct{
@@ -15,7 +17,7 @@ type QueueMsgStruct struct{
 	Retry int			`json:"retry"`
 }
 
-func SendQueueEmail(emailInfo Services.EmailInfo) {
+func SendQueueEmail(emailInfo dto.EmailInfo) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672")
 	failOnError(err, "Failed to create connection in sendEmail")
 	defer conn.Close()

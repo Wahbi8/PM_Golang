@@ -54,7 +54,7 @@ func SendQueueEmail(emailInfo dto.EmailInfo) {
 
 	go func() {
 		for d := range msgs {
-			var msg QueueMsgStruct
+			var msg dto.EmailInfo
 			err := json.Unmarshal(d.Body, &msg)
 			if err != nil {
 				fmt.Printf("Malformed message: %v\n", err)
@@ -62,7 +62,7 @@ func SendQueueEmail(emailInfo dto.EmailInfo) {
 				continue
 			}
 
-			err = Services.SendEmail(msg.Recipient, msg.Subject, msg.Body)
+			err = Services.SendEmail(msg.Recipient, msg.Subject, msg.Message)
 			
 			if err != nil {
 				if msg.Retry >= 3 {

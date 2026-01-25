@@ -61,7 +61,7 @@ func QueueMsg(emailInfo dto.EmailInfo) []byte {
 			"to":      emailInfo.Recipient, 
 			"subject": "Invoice",
 			"body":    emailInfo.Message,
-			"retry":   0,
+			"retry":   emailInfo.Retry,
 			"invoice_id": emailInfo.InvoiceId,
 			"invoice_type": emailInfo.InvoiceType,
 		}

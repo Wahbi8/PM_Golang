@@ -10,7 +10,7 @@ type EmailInfo struct{
     InvoiceId uuid.UUID			`json:"invoice_id"`
     UserId uuid.UUID
     MessageType MessageType
-    InvoiceType InvoiceType
+    InvoiceType InvoiceType		`json:"invoice_type"`
 	Retry int					`json:"retry"`
 }
 type MessageType int

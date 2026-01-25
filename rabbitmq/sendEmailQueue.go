@@ -10,12 +10,6 @@ import (
 
 )
 
-type QueueMsgStruct struct{
-	Recipient string 	`json:"to"`
-	Subject string 		`json:"subject"`
-	Body string 		`json:"body"`
-	Retry int			`json:"retry"`
-}
 
 func SendQueueEmail(emailInfo dto.EmailInfo) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672")

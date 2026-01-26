@@ -7,7 +7,7 @@ import (
 	"github.com/Wahbi8/PM_Golang/Services"
 	amqp "github.com/rabbitmq/amqp091-go"
     "github.com/Wahbi8/PM_Golang/DTO"
-
+	"github.com/Wahbi8/PM_Golang/repository"
 )
 
 
@@ -61,10 +61,8 @@ func SendQueueEmail(emailInfo dto.EmailInfo) {
 			if err != nil {
 				if msg.Retry >= 3 {
 					fmt.Printf("FAILED: Max retries reached for %s. Saving to DB...\n", msg.Recipient)
-					// TODO: Add to database here
-
-
-
+					// TODO: database need to be tested
+					repository.InsertFailedMsgs(&emailInfo, err.Error())
 					d.Ack(false)
 				} else {
 					msg.Retry++

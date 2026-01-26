@@ -3,11 +3,12 @@ package repository
 import (
 	"database/sql"
 	"log"
+	"time"
 
 	"github.com/Wahbi8/PM_Golang/DTO"
 )
 
-func InsertFailedMsgs(emailInfo *dto.EmailInfo) {
+func InsertFailedMsgs(emailInfo *dto.EmailInfo, errorMsg string) {
 	db, err := sql.Open("postgres", Connection())
 	if err != nil {
 		log.Fatal("DB Connection err:", err)
@@ -19,6 +20,15 @@ func InsertFailedMsgs(emailInfo *dto.EmailInfo) {
 	
 	_, err = db.Exec(
 		query,
-		
+		emailInfo.InvoiceId,
+		emailInfo.InvoiceType,
+		emailInfo.Recipient,
+		time.Now(),
+		emailInfo.Message,
+		errorMsg,
 	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }

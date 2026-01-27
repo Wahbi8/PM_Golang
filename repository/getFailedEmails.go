@@ -1,11 +1,11 @@
 package repository
 
-import {
+import (
 	"database/sql"
 	"log"
 
 	"github.com/Wahbi8/PM_Golang/DTO"
-}
+)
 
 func GetFailedEmailsFromDB() {
 	var emailInfo dto.EmailInfo
@@ -15,11 +15,16 @@ func GetFailedEmailsFromDB() {
 	}
 	defer db.Close()
 
-	query := "select * from notification_logs order by created_at asec limit 5"
+	query := `select invoice_id, type, recipient, created_at, payload, error 
+				from notification_logs order by created_at asec limit 5`
 
 	_, err = db.Exec(
 		query,
-		emailInfo.invoice_id,
-		//TODO: to be continued
+		emailInfo.InvoiceId,
+		emailInfo.InvoiceType,
+		emailInfo.Recipient,
+		emailInfo.Created_at,
+		emailInfo.Message,
+		emailInfo.Err,
 	)
 }

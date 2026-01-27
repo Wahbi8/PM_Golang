@@ -1,6 +1,10 @@
 package dto
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type EmailInfo struct{
     Sender string			
@@ -12,6 +16,8 @@ type EmailInfo struct{
     MessageType MessageType
     InvoiceType InvoiceType		`json:"invoice_type"`
 	Retry int					`json:"retry"`
+    Created_at time.Time
+    Err string
 }
 type MessageType int
 

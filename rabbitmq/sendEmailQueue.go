@@ -62,7 +62,7 @@ func SendQueueEmail(emailInfo dto.EmailInfo) {
 				if msg.Retry >= 3 {
 					fmt.Printf("FAILED: Max retries reached for %s. Saving to DB...\n", msg.Recipient)
 					// TODO: database need to be tested
-					repository.InsertFailedMsgs(&emailInfo, err.Error())
+					repository.InsertFailedMsgs(&msg, err.Error())
 					d.Ack(false)
 				} else {
 					msg.Retry++

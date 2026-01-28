@@ -2,36 +2,52 @@ package repository
 
 import (
 	"database/sql"
-	"log"
+	"fmt"
 
 	"github.com/Wahbi8/PM_Golang/DTO"
 )
 
-func GetFailedEmailsFromDB() dto.EmailInfo {
-	//TODO: get list not just one ------- to correct the code
-	var emailInfo dto.EmailInfo
+func GetFailedEmailsFromDB() ([]dto.EmailInfo, error) {
+	var emailList []dto.EmailInfo
+
 	db, err := sql.Open("postgres", Connection())
 	if err != nil {
-		log.Fatal("DB Connection err:", err)
+		return nil, fmt.Errorf("DB Connection err: %w", err)
 	}
 	defer db.Close()
 
-	query := `select invoice_id, type, recipient, created_at, payload, error 
-				from notification_logs order by created_at asc limit 5`
+	query := `SELECT invoice_id, type, recipient, created_at, payload, error 
+			  FROM notification_logs 
+			  ORDER BY created_at ASC LIMIT 5`
 
-	_, err = db.Query(
-		query,
-		emailInfo.InvoiceId,
-		emailInfo.InvoiceType,
-		emailInfo.Recipient,
-		emailInfo.Created_at,
-		emailInfo.Message,
-		emailInfo.Err,
-	)
-
+	rows, err := db.Query(query)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("query error: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item dto.EmailInfo
+
+		err := rows.Scan(
+			&item.InvoiceId,
+			&item.InvoiceType,
+			&item.Recipient,
+			&item.Created_at,
+			&item.Message,
+			&item.Err,
+		)
+
+		if err != nil {
+			return nil, fmt.Errorf("scan error: %w", err)
+		}
+
+		emailList = append(emailList, item)
 	}
 
-	return emailInfo
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return emailList, nil
 }

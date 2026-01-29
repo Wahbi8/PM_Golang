@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	// "github.com/Wahbi8/PM_Golang/Services"
 	amqp "github.com/rabbitmq/amqp091-go"
-	// "github.com/Wahbi8/PM_Golang/DTO"
 	"github.com/Wahbi8/PM_Golang/repository"
 )
 

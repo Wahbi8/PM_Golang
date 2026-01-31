@@ -9,7 +9,7 @@ import (
 func main() {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/url", apis.SendEmailApi)
+	mux.HandleFunc("POST /email/invoice", apis.SendEmailApi)
 
 	log.Fatal(http.ListenAndServe(":1212", mux))
 

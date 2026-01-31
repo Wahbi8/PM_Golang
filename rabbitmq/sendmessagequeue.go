@@ -58,12 +58,12 @@ func SendQueueMsg(emailInfo dto.EmailInfo) {
 
 func QueueMsg(emailInfo dto.EmailInfo) []byte {
 	message := map[string]interface{}{
-			"to":      emailInfo.Recipient, 
+			"RecipientEmail":      emailInfo.Recipient, 
 			"subject": "Invoice",
-			"body":    emailInfo.Message,
+			"Body":    emailInfo.Message,
 			"retry":   emailInfo.Retry,
-			"invoice_id": emailInfo.InvoiceId,
-			"invoice_type": emailInfo.InvoiceType,
+			"InvoiceId": emailInfo.InvoiceId,
+			"InvoiceType": emailInfo.InvoiceType,
 		}
 
 	bytes, err := json.Marshal(message)

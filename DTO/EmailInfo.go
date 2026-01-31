@@ -8,13 +8,13 @@ import (
 
 type EmailInfo struct{
     Sender string			
-    Recipient string			`json:"to"`
-    Message string				`json:"body"`
+    Recipient string			`json:"RecipientEmail"`
+    Message string				`json:"Body"`
     Subject string				`json:"subject"`
-    InvoiceId uuid.UUID			`json:"invoice_id"`
+    InvoiceId uuid.UUID			`json:"InvoiceId"`
     UserId uuid.UUID
     MessageType MessageType
-    InvoiceType InvoiceType		`json:"invoice_type"`
+    InvoiceType InvoiceType		`json:"InvoiceType"`
 	Retry int					`json:"retry"`
     Created_at time.Time
     Err string

@@ -1,23 +1,16 @@
 package rabbitmq
 
 import (
-	// "context"
-	"fmt"
-	"log"
-	// "math/bits"
-	// "os"
-	// "strings"
-	// "time"
 	"encoding/json"
 
+	"github.com/Wahbi8/PM_Golang/DTO"
+	"github.com/Wahbi8/PM_Golang/logger"
 	amqp "github.com/rabbitmq/amqp091-go"
-    "github.com/Wahbi8/PM_Golang/DTO"
-
 )
 
 func failOnError(err error, msg string) {
 	if err != nil {
-		log.Panicf("%s: %s", msg, err)
+		logger.Log.Fatal().Err(err).Str("message", msg).Msg("Failed")
 	}
 }
 
@@ -32,43 +25,43 @@ func SendQueueMsg(emailInfo dto.EmailInfo) {
 
 	q, err := ch.QueueDeclare(
 		"email_queue",
-		true,	//durable
-		false,	//delete when unused
-		false,	//exclusive
-		false,	//no-wait
-		nil,		//arguments
+		true,  //durable
+		false, //delete when unused
+		false, //exclusive
+		false, //no-wait
+		nil,   //arguments
 	)
 	failOnError(err, "problem with the queue")
 
 	err = ch.Publish(
-		"",		//exchange
-		q.Name,	//routing key (queue name)
-		false, 	//mandatory
-		false,	//emmediate
+		"",     //exchange
+		q.Name, //routing key (queue name)
+		false,  //mandatory
+		false,  //emmediate
 		amqp.Publishing{
 			DeliveryMode: amqp.Persistent,
-			ContentType: "application/json",
-			Body: QueueMsg(emailInfo),
+			ContentType:  "application/json",
+			Body:         QueueMsg(emailInfo),
 		},
 	)
 	failOnError(err, "Failed to publish message")
 
-	fmt.Printf("Email queued for %s\n", emailInfo.Recipient)
+	logger.Log.Info().Str("recipient", emailInfo.Recipient).Msg("Email queued")
 }
 
 func QueueMsg(emailInfo dto.EmailInfo) []byte {
 	message := map[string]interface{}{
-			"RecipientEmail":      emailInfo.Recipient, 
-			"subject": "Invoice",
-			"Body":    emailInfo.Message,
-			"retry":   emailInfo.Retry,
-			"InvoiceId": emailInfo.InvoiceId,
-			"InvoiceType": emailInfo.InvoiceType,
-		}
+		"RecipientEmail": emailInfo.Recipient,
+		"subject":        "Invoice",
+		"Body":           emailInfo.Message,
+		"retry":          emailInfo.Retry,
+		"InvoiceId":      emailInfo.InvoiceId,
+		"InvoiceType":    emailInfo.InvoiceType,
+	}
 
 	bytes, err := json.Marshal(message)
 	if err != nil {
-		log.Printf("Error encoding JSON: %s", err)
+		logger.Log.Error().Err(err).Msg("Error encoding JSON")
 		return nil
 	}
 

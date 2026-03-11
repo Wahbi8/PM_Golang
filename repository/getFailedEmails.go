@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Wahbi8/PM_Golang/DTO"
+	"github.com/Wahbi8/PM_Golang/logger"
 )
 
 func GetFailedEmailsFromDB() ([]dto.EmailInfo, error) {
@@ -12,6 +13,7 @@ func GetFailedEmailsFromDB() ([]dto.EmailInfo, error) {
 
 	db, err := sql.Open("postgres", Connection())
 	if err != nil {
+		logger.Log.Error().Err(err).Msg("Failed to connect to database")
 		return nil, fmt.Errorf("DB Connection err: %w", err)
 	}
 	defer db.Close()
@@ -48,6 +50,8 @@ func GetFailedEmailsFromDB() ([]dto.EmailInfo, error) {
 	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("rows iteration error: %w", err)
 	}
+
+	logger.Log.Info().Int("count", len(emailList)).Msg("Retrieved failed emails from DB")
 
 	return emailList, nil
 }
